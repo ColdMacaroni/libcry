@@ -8,6 +8,7 @@ A neat c testing library/framework. 🥲
   - [ ] Forking test runner
   - [ ] Send message back to runner from test process
   - [ ] Prettier asserts
+  - [ ] Some man pages.. [see meson](https://mesonbuild.com/Installing.html)
   - [ ] Test anything protocol implementation
 
 In the future.. idk... threading?
