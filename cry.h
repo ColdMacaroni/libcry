@@ -6,6 +6,8 @@
 // For communicating with runner
 #include <mqueue.h>
 
+#warning "Make macros work with c++"
+
 /* A test function with a description */
 #define test(name, description) test_desc(name, description) test_impl(name)
 /* Just the description of a test */
