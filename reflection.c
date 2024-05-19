@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -51,16 +52,10 @@ static int find_symbols_64(Elf64_Ehdr *ehdr, struct test_list *list) {
 		exit(6);
 	}
 
-	if (ehdr->e_shstrndx == SHN_UNDEF) {
-		fprintf(stderr,
-		        "strtab index is undefined. Unsure how to proceed. "
-		        "If your ELF file is not broken, please open an issue\n");
-		exit(79);
-	}
-
 	Elf64_Shdr *shdrs = get_shdrs(ehdr);
+	Elf64_Shdr *sh_symtab = NULL;
 
-	// Find the symtab to extract all those symbol names mm
+	// Find the symtab to extract all those symbol names
 	for (int i = 0; i < ehdr->e_shnum; i++) {
 		Elf64_Shdr *shdr = &shdrs[i];
 
@@ -68,14 +63,32 @@ static int find_symbols_64(Elf64_Ehdr *ehdr, struct test_list *list) {
 		if (shdr->sh_type != SHT_SYMTAB)
 			continue;
 
-		char *strtab = get_strtab(ehdr, shdr);
+		sh_symtab = shdr;
+		break;
+	}
 
-		Elf64_Sym *symtab = get_symtab(ehdr, shdr);
-		Elf64_Xword symtab_len = shdr->sh_size / shdr->sh_entsize;
-		for (Elf64_Xword sym_idx = 0; sym_idx < symtab_len; sym_idx++) {
-			Elf64_Sym *sym = &symtab[sym_idx];
-			printf("%s\n", &strtab[sym->st_name]);
-		}
+	if (sh_symtab == NULL) {
+		fprintf(stderr, "symtab not found. Is your ELF okay?\n");
+		exit(10);
+	}
+
+	char *strtab = get_strtab(ehdr, sh_symtab);
+
+	Elf64_Sym *symtab = get_symtab(ehdr, sh_symtab);
+	Elf64_Xword symtab_len = sh_symtab->sh_size / sh_symtab->sh_entsize;
+
+	for (Elf64_Xword sym_idx = 0; sym_idx < symtab_len; sym_idx++) {
+		Elf64_Sym *sym = &symtab[sym_idx];
+
+		char *sym_name = &strtab[sym->st_name];
+		char *name;
+		char *type;
+
+		// Must stick to this format.
+		if (sscanf(sym_name, "_cry_test_$%m[^$]$_%ms", &name, &type) != 2)
+			continue;
+
+		printf("found %s for %s\n", type, name);
 	}
 
 	return 0;
