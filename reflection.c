@@ -22,15 +22,34 @@ static struct test_node *new_node(char *name, impl_func *impl,
 	return t;
 }
 
-static int find_symbols_64(struct dl_phdr_info *info, size_t size,
-                           struct test_list *list) {
-
-	return 0;
-}
-
-/** Uses the base addr to grab the ehdr. */
+/** Uses the base addr to grab the elf header. */
 static Elf64_Ehdr *get_ehdr(struct dl_phdr_info *info) {
 	return (Elf64_Ehdr *)info->dlpi_addr;
+}
+
+/** Uses the base info and ehdr to grab the section header. */
+static Elf64_Shdr *get_shdr(struct dl_phdr_info *info, Elf64_Ehdr *ehdr) {
+	return (Elf64_Shdr *)(info->dlpi_addr + ehdr->e_shoff);
+}
+
+
+static int find_symbols_64(struct dl_phdr_info *info, size_t size,
+                           struct test_list *list) {
+	Elf64_Ehdr *ehdr = get_ehdr(info);
+
+	if (sizeof(Elf64_Shdr) != ehdr->e_shentsize) {
+		fprintf(stderr, "Elf64_Shdr is different than e_shentsize. Unsure how to proceed!\n");
+		exit(6);
+	}
+
+	Elf64_Shdr *shdrs = get_shdr(info, ehdr);
+
+	// FIXME: Segfaulting currently because i guess it doesn't map the whole elf
+	for (int i = 0; i < ehdr->e_shnum; i++) {
+		printf("%d. 0x%X\n",i, shdrs[i].sh_type);
+	}
+
+	return 0;
 }
 
 static int phdr_callback(struct dl_phdr_info *info, size_t size, void *data_) {
