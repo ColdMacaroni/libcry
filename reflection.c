@@ -16,10 +16,14 @@
 static struct test_node *new_node(char *name) {
 	struct test_node *t = malloc(sizeof(*t));
 
+	if (t == NULL)
+		return NULL;
+
 	t->name = name;
 	t->impl = NULL;
 	t->desc = NULL;
 	t->next = NULL;
+	t->prev = NULL;
 
 	return t;
 }
@@ -50,7 +54,8 @@ static enum symbol_type str_to_type(const char *type) {
 }
 
 /**
- * Tries to find the node with the given name, or creates one if not found
+ * Tries to find the node with the given name, or creates one if not found.
+ * Only returns null if it was unable to malloc.
  */
 static struct test_node *find_node(struct test_list *list, char *name) {
 	// special case
@@ -59,12 +64,32 @@ static struct test_node *find_node(struct test_list *list, char *name) {
 
 		struct test_node *n = new_node(name);
 
+		if (n == NULL)
+			return NULL;
+
 		list->head = n;
 		list->tail = n;
 		return n;
 	}
 
-	return NULL;
+	// Search linked list starting from the end
+	// It's VERY likely that the queried node will be at the end,
+	// this turns the average case from O(N) to O(1)
+	for (struct test_node *cur = list->tail; cur != NULL; cur = cur->prev) {
+		if (strcmp(cur->name, name) == 0)
+			return cur;
+	}
+
+	struct test_node *n = new_node(name);
+
+	if (n == NULL)
+		return NULL;
+
+	// append
+	list->tail->next = n;
+	n->prev = list->tail;
+	list->tail = n;
+	return n;
 }
 
 /** Uses the base addr to grab the elf header. */
@@ -88,7 +113,11 @@ static Elf64_Sym *get_symtab(Elf64_Ehdr *ehdr, Elf64_Shdr *sh_symtab) {
 	return (Elf64_Sym *)((void *)ehdr + sh_symtab->sh_offset);
 }
 
-//
+/* Finds all the symbols with the format _cry_test_$<name>$_<type>,
+ * and pushes them to the end of the list.
+ * Note that the order might change depending on your tests, list should be
+ * sorted.
+ */
 static void find_symbols_64(Elf64_Ehdr *ehdr, struct test_list *list,
                             void *dlhandle) {
 	if (sizeof(Elf64_Shdr) != ehdr->e_shentsize) {

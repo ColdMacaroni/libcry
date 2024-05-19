@@ -14,6 +14,7 @@ struct test_node {
 	impl_func *impl;
 	desc_func *desc;
 	struct test_node *next;
+	struct test_node *prev;
 };
 
 /* doubly linked list for storing all the function names */
