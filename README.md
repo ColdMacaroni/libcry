@@ -68,7 +68,8 @@ whatever with a specific coredump to make it work.
 
 For most of the assumptions I've made, I left an error message about it so
 please include that in the bug report or whatever. Hopefully it can be fixed
-:'). If it just segfaults out of nowhere make sure to
+:'). If it just segfaults out of nowhere make sure to include the coredump and
+test file. Maybe even the compiled program.
 
 ## are you ok
 
