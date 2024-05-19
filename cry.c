@@ -19,6 +19,8 @@ int main() {
 
 	_cry_find_tests(&tests);
 
+	// TODO: Actual nice command line interface
+
 	int idx = 1;
 	if (tests.head == NULL)
 		printf("No tests found\n");
