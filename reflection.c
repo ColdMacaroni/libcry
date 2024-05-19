@@ -171,8 +171,6 @@ static void find_symbols_64(Elf64_Ehdr *ehdr, struct test_list *list,
 		if (sscanf(sym_name, "_cry_test_$%m[^$]$_%ms", &name, &type_s) != 2)
 			continue;
 
-		printf("found %s for %s\n", type_s, name);
-
 		enum symbol_type type = str_to_type(type_s);
 
 		// Not one of our symbols.
