@@ -313,5 +313,16 @@ static void find_symbols(struct test_list *list) {
 void _cry_find_tests(struct test_list *list) { find_symbols(list); }
 
 void _cry_free_list(struct test_list *list) {
-	fprintf(stderr, "TODO! free list\n");
+	if (list == NULL)
+		return;
+
+	for (struct test_node *cur = list->head; cur != NULL;) {
+		struct test_node *tmp = cur;
+		cur = cur->next;
+
+		free(tmp->name);
+		free(tmp);
+	}
+
+	list->head = NULL;
 }
