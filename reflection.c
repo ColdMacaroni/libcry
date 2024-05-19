@@ -30,9 +30,15 @@ static struct test_node *new_node(char *name, impl_func *impl,
 /** Uses the ehdr data to grab the section header.
  * ehdr must point to the start of the elf.
  */
-static Elf64_Shdr *get_shdr(Elf64_Ehdr *ehdr) {
+static Elf64_Shdr *get_shdrs(Elf64_Ehdr *ehdr) {
 	return (Elf64_Shdr *)((void *)ehdr + ehdr->e_shoff);
 }
+
+static char *get_strtab(Elf64_Ehdr *ehdr) {
+	Elf64_Shdr *sh_strtab = &get_shdrs(ehdr)[ehdr->e_shstrndx];
+	return (char *)((void *)ehdr + sh_strtab->sh_offset);
+}
+
 //
 static int find_symbols_64(Elf64_Ehdr *ehdr, struct test_list *list) {
 	if (sizeof(Elf64_Shdr) != ehdr->e_shentsize) {
@@ -41,11 +47,26 @@ static int find_symbols_64(Elf64_Ehdr *ehdr, struct test_list *list) {
 		exit(6);
 	}
 
-	Elf64_Shdr *shdrs = get_shdr(ehdr);
+	if (ehdr->e_shstrndx == SHN_UNDEF) {
+		fprintf(stderr,
+		        "strtab index is undefined. Unsure how to proceed. "
+		        "If your ELF file is not broken, please open an issue\n");
+		exit(79);
+	}
+
+	Elf64_Shdr *shdrs = get_shdrs(ehdr);
+	char *strtab = get_strtab(ehdr);
 
 	// List types for debugging purposes
 	for (int i = 0; i < ehdr->e_shnum; i++) {
-		printf("%d. 0x%X\n", i, shdrs[i].sh_type);
+		Elf64_Shdr *shdr = &shdrs[i];
+
+		// We only care about this
+		if (shdr->sh_type != SHT_SYMTAB)
+			continue;
+
+		printf("Found symtab at %d\n", i);
+		printf("%s\n", &strtab[shdr->sh_name]);
 	}
 
 	return 0;
