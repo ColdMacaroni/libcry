@@ -9,7 +9,7 @@ typedef char *(desc_func)(void);
 
 /* linked list node */
 struct test_node {
-	/* This filed should NEVER be null */
+	/* This field should NEVER be null */
 	char *name;
 	impl_func *impl;
 	desc_func *desc;
