@@ -1,4 +1,6 @@
 #include "reflection.h"
+#include <assert.h>
+#include <dlfcn.h>
 #include <elf.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -11,16 +13,58 @@
 /**
  * Mallocs and sets up a new node
  */
-static struct test_node *new_node(char *name, impl_func *impl,
-                                  desc_func *desc) {
+static struct test_node *new_node(char *name) {
 	struct test_node *t = malloc(sizeof(*t));
 
 	t->name = name;
-	t->impl = impl;
-	t->desc = desc;
+	t->impl = NULL;
+	t->desc = NULL;
 	t->next = NULL;
 
 	return t;
+}
+
+enum symbol_type {
+	UNKNOWN,
+	IMPL,
+	DESC,
+};
+
+/**
+ * Converts the given string to a symbol_type
+ * string | enum
+ * -------+-----
+ *  impl  | IMPL
+ *  desc  | DESC
+ *
+ *  any other returns an UNKNOWN.
+ */
+static enum symbol_type str_to_type(const char *type) {
+	if (strcmp(type, "impl") == 0) {
+		return IMPL;
+	} else if (strcmp(type, "desc") == 0) {
+		return DESC;
+	} else {
+		return UNKNOWN;
+	}
+}
+
+/**
+ * Tries to find the node with the given name, or creates one if not found
+ */
+static struct test_node *find_node(struct test_list *list, char *name) {
+	// special case
+	if (list->head == NULL) {
+		assert(list->tail == NULL);
+
+		struct test_node *n = new_node(name);
+
+		list->head = n;
+		list->tail = n;
+		return n;
+	}
+
+	return NULL;
 }
 
 /** Uses the base addr to grab the elf header. */
@@ -45,7 +89,8 @@ static Elf64_Sym *get_symtab(Elf64_Ehdr *ehdr, Elf64_Shdr *sh_symtab) {
 }
 
 //
-static int find_symbols_64(Elf64_Ehdr *ehdr, struct test_list *list) {
+static void find_symbols_64(Elf64_Ehdr *ehdr, struct test_list *list,
+                            void *dlhandle) {
 	if (sizeof(Elf64_Shdr) != ehdr->e_shentsize) {
 		fprintf(stderr, "Elf64_Shdr is different than e_shentsize. Unsure how "
 		                "to proceed!\n");
@@ -82,16 +127,57 @@ static int find_symbols_64(Elf64_Ehdr *ehdr, struct test_list *list) {
 
 		char *sym_name = &strtab[sym->st_name];
 		char *name;
-		char *type;
+		char *type_s;
 
 		// Must stick to this format.
-		if (sscanf(sym_name, "_cry_test_$%m[^$]$_%ms", &name, &type) != 2)
+		if (sscanf(sym_name, "_cry_test_$%m[^$]$_%ms", &name, &type_s) != 2)
 			continue;
 
-		printf("found %s for %s\n", type, name);
+		printf("found %s for %s\n", type_s, name);
+
+		enum symbol_type type = str_to_type(type_s);
+
+		// Not one of our symbols.
+		if (type == UNKNOWN)
+			continue;
+
+		void *symbol = dlsym(dlhandle, sym_name);
+		if (symbol == NULL) {
+			fprintf(stderr, "Error reading symbol %s\n", sym_name);
+			perror("dlsym");
+			exit(99);
+		}
+
+		struct test_node *n = find_node(list, name);
+
+		if (n == NULL) {
+			fprintf(
+			    stderr,
+			    "Couldn't allocate a linked list node for %s, stopping early\n",
+			    sym_name);
+			free(type_s);
+			free(name);
+			return;
+		}
+
+		switch (type) {
+		case IMPL:
+			n->impl = symbol;
+			break;
+		case DESC:
+			n->desc = symbol;
+			break;
+
+		case UNKNOWN:
+			// should be unreachable
+			break;
+		}
+
+		// Don't free name because it's in the linked list
+		free(type_s);
 	}
 
-	return 0;
+	return;
 }
 
 /* Populates the given list with symbols. Both its pointers should be null.
@@ -140,9 +226,18 @@ static void find_symbols(struct test_list *list) {
 		exit(42);
 	}
 
+	void *handle = dlopen(NULL, RTLD_LAZY);
+	if (handle == NULL) {
+		fprintf(stderr, "Couldn't dlopen self\n");
+		perror("dlopen");
+		munmap(ehdr, buf.st_size);
+		close(fd);
+		exit(51);
+	}
+
 	switch (ehdr->e_ident[EI_CLASS]) {
 	case ELFCLASS64:
-		find_symbols_64(ehdr, list);
+		find_symbols_64(ehdr, list, handle);
 		break;
 	case ELFCLASS32:
 		fprintf(stderr, "Sorry!! 32bit isn't supported currently. "
@@ -164,6 +259,10 @@ static void find_symbols(struct test_list *list) {
 	}
 
 	// Technically we can still keep going, right?
+	if (dlclose(handle) < 0) {
+		perror("dlclose");
+	}
+
 	if (munmap(ehdr, buf.st_size) < 0) {
 		perror("munmap");
 	}

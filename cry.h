@@ -9,9 +9,9 @@
 /* A test function with a description */
 #define test(name, description) test_desc(name, description) test_impl(name)
 /* Just the description of a test */
-#define test_desc(name, desc) char* _cry_test__##name##__desc() {return desc;}
+#define test_desc(name, desc) char* _cry_test_$##name##$_desc() {return desc;}
 /* Just the implementation of a test */
-#define test_impl(name) void _cry_test__##name##__impl(mqd_t _cry__mqd)
+#define test_impl(name) void _cry_test_$##name##$_impl(mqd_t _cry__mqd)
 
 /* Aborts if false */
 #define cry_assert(expr) ({if(!(expr)) abort();})
