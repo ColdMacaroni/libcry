@@ -13,7 +13,6 @@
 // https://refspecs.linuxbase.org/elf/gabi4+/ch4.sheader.html#sh_type
 // https://wiki.osdev.org/ELF_Tutorial
 
-
 static void run_tests(struct test_list *list) {
 	// TODO: Create a message queue and read it after child has exited.
 	// NOTE: I think it's better to print output as tests run, easier to see
@@ -21,7 +20,8 @@ static void run_tests(struct test_list *list) {
 }
 
 int main() {
-	struct test_list tests = {NULL, NULL};
+	struct test_list tests = {NULL};
+
 	_cry_find_tests(&tests);
 
 	int idx = 1;

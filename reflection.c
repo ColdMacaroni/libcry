@@ -23,7 +23,6 @@ static struct test_node *new_node(char *name) {
 	t->impl = NULL;
 	t->desc = NULL;
 	t->next = NULL;
-	t->prev = NULL;
 
 	return t;
 }
@@ -56,26 +55,22 @@ static enum symbol_type str_to_type(const char *type) {
 /**
  * Tries to find the node with the given name, or creates one if not found.
  * Only returns null if it was unable to malloc.
+ * Keeps the list in order
  */
 static struct test_node *find_node(struct test_list *list, char *name) {
 	// special case
 	if (list->head == NULL) {
-		assert(list->tail == NULL);
-
 		struct test_node *n = new_node(name);
 
 		if (n == NULL)
 			return NULL;
 
 		list->head = n;
-		list->tail = n;
 		return n;
 	}
 
-	// Search linked list starting from the end
-	// It's VERY likely that the queried node will be at the end,
-	// this turns the average case from O(N) to O(1)
-	for (struct test_node *cur = list->tail; cur != NULL; cur = cur->prev) {
+	// Try to find mathcing name
+	for (struct test_node *cur = list->head; cur != NULL; cur = cur->next) {
 		if (strcmp(cur->name, name) == 0)
 			return cur;
 	}
@@ -85,18 +80,34 @@ static struct test_node *find_node(struct test_list *list, char *name) {
 	if (n == NULL)
 		return NULL;
 
-	// append
-	list->tail->next = n;
-	n->prev = list->tail;
-	list->tail = n;
-	return n;
+	struct test_node *other = list->head;
+
+	// Special case where it's the new first element
+	int cmp = strcmp(n->name, other->name);
+	if (cmp < 0) {
+		n->next = other;
+		list->head = n;
+		return n;
+	}
+
+	// append sorted
+	while (1) {
+		if (other->next == NULL) {
+			other->next = n;
+			return n;
+		}
+
+		cmp = strcmp(n->name, other->next->name);
+		if (cmp < 0) {
+			n->next = other->next;
+			other->next = n;
+			return n;
+		}
+
+		other = other->next;
+	}
 }
 
-/** Uses the base addr to grab the elf header. */
-// static Elf64_Ehdr *get_ehdr(struct dl_phdr_info *info) {
-// 	return (Elf64_Ehdr *)info->dlpi_addr;
-// }
-//
 /** Uses the ehdr data to grab the section header.
  * ehdr must point to the start of the elf.
  */
@@ -115,8 +126,6 @@ static Elf64_Sym *get_symtab(Elf64_Ehdr *ehdr, Elf64_Shdr *sh_symtab) {
 
 /* Finds all the symbols with the format _cry_test_$<name>$_<type>,
  * and pushes them to the end of the list.
- * Note that the order might change depending on your tests, list should be
- * sorted.
  */
 static void find_symbols_64(Elf64_Ehdr *ehdr, struct test_list *list,
                             void *dlhandle) {
@@ -301,15 +310,7 @@ static void find_symbols(struct test_list *list) {
 	}
 }
 
-void _cry_find_tests(struct test_list *list) {
-	find_symbols(list);
-
-	// https://stackoverflow.com/questions/2694290/returning-a-shared-library-symbol-table/2694373#2694373
-	// TODO:
-	// void *handle = dlopen(NULL, RTLD_LAZY);
-	//
-	// dlclose(handle);
-}
+void _cry_find_tests(struct test_list *list) { find_symbols(list); }
 
 void _cry_free_list(struct test_list *list) {
 	fprintf(stderr, "TODO! free list\n");

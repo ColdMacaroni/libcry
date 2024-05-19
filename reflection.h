@@ -14,13 +14,11 @@ struct test_node {
 	impl_func *impl;
 	desc_func *desc;
 	struct test_node *next;
-	struct test_node *prev;
 };
 
 /* doubly linked list for storing all the function names */
 struct test_list {
 	struct test_node *head;
-	struct test_node *tail;
 };
 
 /* uses ELF trickery to find all the tests */
