@@ -64,22 +64,16 @@ static int find_symbols_64(Elf64_Ehdr *ehdr, struct test_list *list) {
 	// Find the symtab to extract all those symbol names mm
 	for (int i = 0; i < ehdr->e_shnum; i++) {
 		Elf64_Shdr *shdr = &shdrs[i];
-		if (shdr->sh_type == 3) {
-			printf("-- %s in %d\n", &strtab[shdr->sh_name], i);
-		}
 
 		// We only care about this
 		if (shdr->sh_type != SHT_SYMTAB)
 			continue;
 
 		Elf64_Sym *symtab = get_symtab(ehdr, shdr);
-
-		for (unsigned int j = 0; j < shdr->sh_info; j++) {
-			Elf64_Sym *sym = &symtab[j];
-			// printf("%u. %s\n", j, &strtab[sym->st_name]);
-			// 34 == .strtab
-			printf("%u. %s\n", j,
-			       &((char *)ehdr + shdrs[34].sh_offset)[sym->st_name]);
+		for (Elf64_Xword sym_idx = 0;
+		     sym_idx < shdr->sh_size / shdr->sh_entsize; sym_idx++) {
+			Elf64_Sym *sym = &symtab[sym_idx];
+			printf("%s\n", &((char *)ehdr + shdrs[34].sh_offset)[sym->st_name]);
 		}
 	}
 
