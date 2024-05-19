@@ -1,17 +1,24 @@
 #include "cry.h"
 #include "reflection.h"
-#include <elf.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#define __USE_GNU
-#include <dlfcn.h>
-#include <link.h>
-
 static void run_tests(struct test_list *list) {
-	// TODO: Create a message queue and read it after child has exited.
+	// TODO: Create a message queue, then read it after child has exited.
 	// NOTE: I think it's better to print output as tests run, easier to see
-	// if something is stuck in a loop and stuff.
+	// if something is stuck in a loop and stuff. Make sure to flush
+	int idx = 1;
+	for (struct test_node *n = list->head; n != NULL; n = n->next, idx++) {
+		printf("Running %s - %s... ", n->name,
+		       n->desc == NULL ? "(no description)" : (*n->desc)());
+		fflush(stdout);
+		if (n->impl == NULL) {
+			printf("skipped\n");
+		} else {
+			(*n->impl)(0);
+			printf("passed\n");
+		}
+	}
 }
 
 int main() {
@@ -35,6 +42,8 @@ int main() {
 			}
 			putchar('\n');
 		}
+
+	run_tests(&tests);
 
 	_cry_free_list(&tests);
 }
