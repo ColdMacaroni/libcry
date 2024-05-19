@@ -8,11 +8,6 @@
 #include <dlfcn.h>
 #include <link.h>
 
-// docs
-// https://en.wikipedia.org/wiki/Executable_and_Linkable_Format
-// https://refspecs.linuxbase.org/elf/gabi4+/ch4.sheader.html#sh_type
-// https://wiki.osdev.org/ELF_Tutorial
-
 static void run_tests(struct test_list *list) {
 	// TODO: Create a message queue and read it after child has exited.
 	// NOTE: I think it's better to print output as tests run, easier to see
