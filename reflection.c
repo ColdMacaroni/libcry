@@ -110,6 +110,14 @@ static void find_symbols(struct test_list *list) {
 		exit(42);
 	}
 
+	if (ehdr->e_version != 1) {
+		fprintf(stderr, "Unsupported ELF version %u\n", ehdr->e_version);
+
+		munmap(ehdr, buf.st_size);
+		close(fd);
+		exit(42);
+	}
+
 	switch (ehdr->e_ident[EI_CLASS]) {
 	case ELFCLASS64:
 		find_symbols_64(ehdr, list);
