@@ -39,6 +39,10 @@ static char *get_strtab(Elf64_Ehdr *ehdr) {
 	return (char *)((void *)ehdr + sh_strtab->sh_offset);
 }
 
+static Elf64_Sym *get_symtab(Elf64_Ehdr *ehdr, Elf64_Shdr *sh_symtab) {
+	return (Elf64_Sym *)((void *)ehdr + sh_symtab->sh_offset);
+}
+
 //
 static int find_symbols_64(Elf64_Ehdr *ehdr, struct test_list *list) {
 	if (sizeof(Elf64_Shdr) != ehdr->e_shentsize) {
@@ -57,16 +61,26 @@ static int find_symbols_64(Elf64_Ehdr *ehdr, struct test_list *list) {
 	Elf64_Shdr *shdrs = get_shdrs(ehdr);
 	char *strtab = get_strtab(ehdr);
 
-	// List types for debugging purposes
+	// Find the symtab to extract all those symbol names mm
 	for (int i = 0; i < ehdr->e_shnum; i++) {
 		Elf64_Shdr *shdr = &shdrs[i];
+		if (shdr->sh_type == 3) {
+			printf("-- %s in %d\n", &strtab[shdr->sh_name], i);
+		}
 
 		// We only care about this
 		if (shdr->sh_type != SHT_SYMTAB)
 			continue;
 
-		printf("Found symtab at %d\n", i);
-		printf("%s\n", &strtab[shdr->sh_name]);
+		Elf64_Sym *symtab = get_symtab(ehdr, shdr);
+
+		for (unsigned int j = 0; j < shdr->sh_info; j++) {
+			Elf64_Sym *sym = &symtab[j];
+			// printf("%u. %s\n", j, &strtab[sym->st_name]);
+			// 34 == .strtab
+			printf("%u. %s\n", j,
+			       &((char *)ehdr + shdrs[34].sh_offset)[sym->st_name]);
+		}
 	}
 
 	return 0;
