@@ -130,16 +130,16 @@ static struct test_node *find_node(struct test_list *list, char *name) {
  * ehdr must point to the start of the elf.
  */
 static Elf64_Shdr *get_shdrs(Elf64_Ehdr *ehdr) {
-	return (Elf64_Shdr *)((void *)ehdr + ehdr->e_shoff);
+	return (Elf64_Shdr *)((char *)ehdr + ehdr->e_shoff);
 }
 
 static char *get_strtab(Elf64_Ehdr *ehdr, Elf64_Shdr *shdr) {
 	Elf64_Shdr *sh_strtab = &get_shdrs(ehdr)[shdr->sh_link];
-	return (char *)((void *)ehdr + sh_strtab->sh_offset);
+	return (char *)ehdr + sh_strtab->sh_offset;
 }
 
 static Elf64_Sym *get_symtab(Elf64_Ehdr *ehdr, Elf64_Shdr *sh_symtab) {
-	return (Elf64_Sym *)((void *)ehdr + sh_symtab->sh_offset);
+	return (Elf64_Sym *)((char *)ehdr + sh_symtab->sh_offset);
 }
 
 /* Finds all the symbols with the format _cry_test_$<name>$_<type>,
