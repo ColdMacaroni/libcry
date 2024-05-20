@@ -10,6 +10,10 @@ A neat c testing library/framework. 🥲
   - [ ] Prettier asserts
   - [ ] Some man pages.. [see meson](https://mesonbuild.com/Installing.html)
   - [ ] Test anything protocol implementation
+  - [ ] Some nice CLI
+      - [ ] Add a flag for picking which file to `mmap` and `dlopen`. This would
+        let you actually debug the tests. Might be able to detect if under a
+        debugger and advise the user to run with this flag.
 
 In the future.. idk... threading?
 
