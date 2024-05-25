@@ -2,6 +2,12 @@
 
 A neat c testing library/framework with the goal of having the least boilerplate 🥲
 
+Each test suite is its own self-contained binary with a consistent CLI. No more
+dedicated test runners!
+These binaries implement the [Test Anything Protocol](http://testanything.org/),
+so you can use any consumer that you'd like! TAP is pretty enough that you can
+just run them normally as well.
+
 ## Roadmap
 
 - [ ] For 1.0
