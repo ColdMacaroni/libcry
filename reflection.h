@@ -36,6 +36,7 @@ struct test_node {
 /* singly linked list for storing all the function names */
 struct test_list {
 	struct test_node *head;
+	int count;
 };
 
 /* uses ELF trickery to find all the tests */

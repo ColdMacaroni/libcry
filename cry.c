@@ -22,6 +22,9 @@
 #include <stdlib.h>
 
 static void run_tests(struct test_list *list) {
+	printf("TAP version 14\n");
+	printf("1..%d\n", list->count);
+
 	// TODO: Create a message queue, then read it after child has exited.
 	// NOTE: I think it's better to print output as tests run, easier to see
 	// if something is stuck in a loop and stuff. Make sure to flush
@@ -40,7 +43,7 @@ static void run_tests(struct test_list *list) {
 }
 
 int main() {
-	struct test_list tests = {NULL};
+	struct test_list tests = {NULL, 0};
 
 	_cry_find_tests(&tests);
 

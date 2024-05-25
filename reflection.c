@@ -83,6 +83,8 @@ static struct test_node *find_node(struct test_list *list, char *name) {
 		if (n == NULL)
 			return NULL;
 
+		list->count++;
+
 		list->head = n;
 		return n;
 	}
@@ -97,6 +99,8 @@ static struct test_node *find_node(struct test_list *list, char *name) {
 
 	if (n == NULL)
 		return NULL;
+
+	list->count++;
 
 	struct test_node *other = list->head;
 
