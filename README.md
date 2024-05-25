@@ -1,21 +1,33 @@
 # LibCry
 
-A neat c testing library/framework. 🥲
+A neat c testing library/framework with the goal of having the least boilerplate 🥲
 
 ## Roadmap
 
 - [ ] For 1.0
+
   - [ ] Forking test runner
   - [ ] Send message back to runner from test process
-  - [ ] Prettier asserts
+
+    - [ ] Force skip
+    - [ ] Force fail
+    - [ ] Force pass
+
+  - [ ] Allow for setup and cleanup functions
+  - [ ] Prettier asserts and such
   - [ ] Some man pages.. [see meson](https://mesonbuild.com/Installing.html)
   - [ ] Test anything protocol implementation
   - [ ] Some nice CLI
-      - [ ] Add a flag for picking which file to `mmap` and `dlopen`. This would
-        let you actually debug the tests. Might be able to detect if under a
-        debugger and advise the user to run with this flag.
 
-In the future.. idk... threading?
+    - [x] List tests
+    - [ ] Nice help message
+    - [ ] Pick tests to run?
+    - [ ] Add a flag for picking which file to `mmap` and `dlopen`. This would
+          let you actually debug the tests. Might be able to detect if under a
+          debugger and advise the user to run with this flag.
+
+- Other ideas
+  - [ ] Windows/non ELF support?
 
 ## Why the name?
 
