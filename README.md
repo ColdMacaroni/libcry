@@ -11,20 +11,16 @@ just run them normally as well.
 ## Roadmap
 
 - [ ] For 1.0
-
   - [ ] Forking test runner
   - [ ] Send message back to runner from test process
-
     - [ ] Force skip
     - [ ] Force fail
     - [ ] Force pass
-
   - [ ] Allow for setup and cleanup functions
   - [ ] Prettier asserts and such
   - [ ] Some man pages.. [see meson](https://mesonbuild.com/Installing.html)
   - [ ] Test anything protocol implementation
   - [ ] Some nice CLI
-
     - [x] List tests
     - [ ] Nice help message
     - [ ] Pick tests to run?
