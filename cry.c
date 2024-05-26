@@ -35,15 +35,19 @@ static void run_tests(struct test_list *list) {
 	// if something is stuck in a loop and stuff. Make sure to flush
 	int idx = 1;
 	for (struct test_node *n = list->head; n != NULL; n = n->next, idx++) {
-		printf("Running %s - %s... ", n->name,
-		       n->desc == NULL ? "(no description)" : (*n->desc)());
-		fflush(stdout);
-		if (n->impl == NULL) {
-			printf("skipped\n");
-		} else {
+		if (n->impl != NULL)
 			(*n->impl)(0);
-			printf("passed\n");
-		}
+
+		// Currently any failed tests will abort the program, so if it reaches here, it passes.
+		printf("ok %d", idx);
+
+		if (n->desc != NULL)
+			printf(" - %s", (*n->desc)());
+
+		if (n->impl == NULL)
+			printf(" # SKIP: no implementation");
+
+		putchar('\n');
 	}
 
 	if (list->cleanup != NULL) {
