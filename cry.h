@@ -24,16 +24,26 @@
 // For communicating with runner
 #include <mqueue.h>
 
-#warning "Make macros work with c++"
-
 /* A test function with a description */
 #define test(name, description) test_desc(name, description) test_impl(name)
-/* Just the description of a test */
-#define test_desc(name, desc) char* _cry_test_$##name##$_desc() {return desc;}
-/* Just the implementation of a test */
-#define test_impl(name) void _cry_test_$##name##$_impl(mqd_t _cry__mqd)
 
 /* Aborts if false */
 #define cry_assert(expr) ({if(!(expr)) abort();})
+
+#ifndef __cplusplus
+
+/* Just the description of a test */
+#define test_desc(name, desc) const char* _cry_test_$##name##$_desc() {return desc;}
+/* Just the implementation of a test */
+#define test_impl(name) void _cry_test_$##name##$_impl(mqd_t _cry__mqd)
+
+#else // -------
+
+/* Just the description of a test */
+#define test_desc(name, desc) extern "C" const char* _cry_test_$##name##$_desc() {return &desc[0];}
+/* Just the implementation of a test */
+#define test_impl(name) extern "C" void _cry_test_$##name##$_impl(mqd_t _cry__mqd)
+
+#endif /* __cplusplus */
 
 #endif /* __LIB_CRY__ */

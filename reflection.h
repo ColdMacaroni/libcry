@@ -22,7 +22,7 @@
 
 #include <mqueue.h>
 typedef void(impl_func)(mqd_t);
-typedef char *(desc_func)(void);
+typedef const char *(desc_func)(void);
 
 /* linked list node */
 struct test_node {

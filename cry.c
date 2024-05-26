@@ -64,7 +64,7 @@ static void list_tests(struct test_list *list) {
 
 	int idx = 1;
 	for (struct test_node *n = list->head; n != NULL; n = n->next, idx++) {
-		char *desc = "(no description)";
+		const char *desc = "(no description)";
 		if (n->desc != NULL) {
 			desc = (*n->desc)();
 		}
