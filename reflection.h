@@ -23,6 +23,8 @@
 #include <mqueue.h>
 typedef void(impl_func)(mqd_t);
 typedef const char *(desc_func)(void);
+typedef void(setup_func)(mqd_t);
+typedef void(cleanup_func)(mqd_t);
 
 /* linked list node */
 struct test_node {
@@ -37,6 +39,8 @@ struct test_node {
 struct test_list {
 	struct test_node *head;
 	int count;
+	setup_func *setup;
+	cleanup_func *cleanup;
 };
 
 /* uses ELF trickery to find all the tests */

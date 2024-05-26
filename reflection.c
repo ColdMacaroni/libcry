@@ -189,6 +189,32 @@ static void find_symbols_64(Elf64_Ehdr *ehdr, struct test_list *list,
 		char *name;
 		char *type_s;
 
+		// FIXME: This is very ugly, tidy up later. Split into funcs or smth
+		if (strcmp(sym_name, "_cry$setup") == 0) {
+			void *symbol = dlsym(dlhandle, sym_name);
+			if (symbol == NULL) {
+				fprintf(stderr, "Error reading symbol %s\n", sym_name);
+				// TODO: If errno is not set, then ask if they compiled with
+				// rdynamic
+				perror("dlsym");
+				exit(99);
+			}
+
+			list->setup = symbol;
+			continue;
+		} else if (strcmp(sym_name, "_cry$cleanup") == 0) {
+			void *symbol = dlsym(dlhandle, sym_name);
+			if (symbol == NULL) {
+				fprintf(stderr, "Error reading symbol %s\n", sym_name);
+				// TODO: If errno is not set, then ask if they compiled with
+				// rdynamic
+				perror("dlsym");
+				exit(99);
+			}
+			list->cleanup = symbol;
+			continue;
+		}
+
 		// Must stick to this format.
 		if (sscanf(sym_name, "_cry_test_$%m[^$]$_%ms", &name, &type_s) != 2)
 			continue;
@@ -202,6 +228,8 @@ static void find_symbols_64(Elf64_Ehdr *ehdr, struct test_list *list,
 		void *symbol = dlsym(dlhandle, sym_name);
 		if (symbol == NULL) {
 			fprintf(stderr, "Error reading symbol %s\n", sym_name);
+			// TODO: If errno is not set, then ask if they compiled with
+			// rdynamic
 			perror("dlsym");
 			exit(99);
 		}

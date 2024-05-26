@@ -32,12 +32,26 @@
 
 #ifndef __cplusplus
 
+/* Function to be ran before any tests are ran */
+#define cry_setup() void _cry$setup(mqdt _cry__mqd)
+
+// TODO: Can we guarantee this? Needs the forking runner
+/* Function to be ran after everything has been ran. NOTE: Not guaranteed. */
+#define cry_cleanup() void _cry$cleanup(mqdt _cry__mqd)
+
 /* Just the description of a test */
 #define test_desc(name, desc) const char* _cry_test_$##name##$_desc() {return desc;}
 /* Just the implementation of a test */
 #define test_impl(name) void _cry_test_$##name##$_impl(mqd_t _cry__mqd)
 
 #else // -------
+
+/* Function to be ran before any tests are ran */
+#define cry_setup() extern "C" void _cry$setup(mqd_t _cry__mqd)
+
+// TODO: Can we guarantee this? Needs the forking runner
+/* Function to be ran after everything has been ran. NOTE: Not guaranteed. */
+#define cry_cleanup() extern "C" void _cry$cleanup(mqd_t _cry__mqd)
 
 /* Just the description of a test */
 #define test_desc(name, desc) extern "C" const char* _cry_test_$##name##$_desc() {return &desc[0];}
