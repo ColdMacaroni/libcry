@@ -20,7 +20,7 @@
 
 #ifndef __LIB_CRY__
 #define __LIB_CRY__
-#include <stdlib.h>
+
 // For communicating with runner
 #include <mqueue.h>
 
