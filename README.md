@@ -8,6 +8,8 @@ These binaries implement the [Test Anything Protocol](http://testanything.org/),
 so you can use any consumer that you'd like! TAP is pretty enough that you can
 just run them normally as well.
 
+You can also run the tests under a debugger ! Woah !
+
 ## Roadmap
 
 - [ ] For 1.0
@@ -24,9 +26,7 @@ just run them normally as well.
     - [x] List tests
     - [ ] Nice help message
     - [ ] Pick tests to run?
-    - [ ] Add a flag for picking which file to `mmap` and `dlopen`. This would
-          let you actually debug the tests. Might be able to detect if under a
-          debugger and advise the user to run with this flag.
+    - [ ] Add a flag for picking which file to `mmap` and `dlopen`?
 
 - Other ideas
   - [ ] Windows/non ELF support?
@@ -78,9 +78,7 @@ Feel free to open an issue, a PR, send an issue to my email, or even send a git
 patch to my email ! (see `git format-patch` and `git send-email`). They are all
 welcome and I'll try to get back to you in time.
 
-You can just build normally with meson, nothing fancy. **Important:** Running
-with a debugger is weird. It'll grab the wrong symbols. Make sure to run gdb or
-whatever with a specific coredump to make it work.
+You can just build normally with meson, nothing fancy.
 
 ## It threw an error at me
 
