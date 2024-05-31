@@ -23,6 +23,7 @@
 
 // For communicating with runner
 #include <mqueue.h>
+#include <stdlib.h>
 
 /* A test function with a description */
 #define test(name, description) test_desc(name, description) test_impl(name)
