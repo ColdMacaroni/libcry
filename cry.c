@@ -20,6 +20,7 @@
 #include "reflection.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 static void run_tests(struct test_list *list) {
@@ -34,11 +35,46 @@ static void run_tests(struct test_list *list) {
 	// NOTE: I think it's better to print output as tests run, easier to see
 	// if something is stuck in a loop and stuff. Make sure to flush
 	int idx = 1;
+	// FIXME: this is kinda ugly ngl
 	for (struct test_node *n = list->head; n != NULL; n = n->next, idx++) {
-		if (n->impl != NULL)
-			(*n->impl)(0);
+		pid_t pid = fork();
+		int stat = 0;
+		switch (pid) {
+		case 0:
+			// child
+			if (n->impl != NULL)
+				(*n->impl)(0);
 
-		// Currently any failed tests will abort the program, so if it reaches here, it passes.
+			exit(0);
+			break;
+		case -1:
+			// failed to fork, just run normally.
+			printf("# note: failed to fork\n");
+			if (n->impl != NULL)
+				(*n->impl)(0);
+
+			break;
+		default:
+			if (waitpid(pid, &stat, 0) < 0) {
+				// Special case
+				printf("not ok %d", idx);
+
+				if (n->desc != NULL)
+					printf(" - %s", (*n->desc)());
+
+				printf(" # Error waiting for test to finish\n");
+				continue;
+			}
+
+			// All 0s on success. Signals and such will set some bits
+			if (!stat)
+				break;
+
+			printf("not ");
+		}
+
+		// Currently any failed tests will abort the program, so if it reaches
+		// here, it passes.
 		printf("ok %d", idx);
 
 		if (n->desc != NULL)
@@ -55,9 +91,7 @@ static void run_tests(struct test_list *list) {
 	}
 }
 
-static void print_help() {
-	printf("TODO: Help..\n");
-}
+static void print_help() { printf("TODO: Help..\n"); }
 
 static void list_tests(struct test_list *list) {
 	if (list->count == 0) {
