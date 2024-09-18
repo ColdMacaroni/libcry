@@ -1,5 +1,9 @@
 # LibCry
 
+> NOTE: I'm planning on changing how the symbol search works once time allows. Check the better-symbol-search branch for progress
+
+---
+
 A neat c testing library/framework with the goal of having the least boilerplate 🥲
 
 Each test suite is its own self-contained binary with a consistent CLI. No more
