@@ -18,7 +18,7 @@ You can also run the tests under a debugger ! Woah !
     - [ ] Force skip
     - [ ] Force fail
     - [ ] Force pass
-  - [ ] Allow for setup and cleanup functions
+  - [X] Allow for setup and cleanup functions
   - [ ] Prettier asserts and such
   - [ ] Some man pages.. [see meson](https://mesonbuild.com/Installing.html)
   - [ ] Test anything protocol implementation
